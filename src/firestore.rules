@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default Deny All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper Functions
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Campaigns Collection (Shared Community YouTube Pool)
+    // Accessible across all visitors and friends on the website
+    match /campaigns/{campaignId} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if true;
+    }
+
+    // Presence Collection (Real-Time Online Creators Tracker)
+    match /presence/{presenceId} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // Users Collection (Synced creator profiles and balances)
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if false;
+    }
+
+    // Orders Collection (Instant digital receipts)
+    match /orders/{orderId} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if false;
+    }
+
+    // Global Stats Collection
+    match /global_stats/{statId} {
+      allow read: if true;
+      allow create, update, write: if true;
+    }
+  }
+}
+

@@ -1,0 +1,119 @@
+{
+  "entities": {
+    "user": {
+      "title": "User",
+      "description": "User profile with credits balance, VIP membership, and stats",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "User UID" },
+        "username": { "type": "string", "maxLength": 50, "description": "Display username" },
+        "email": { "type": "string", "maxLength": 120, "description": "User email address" },
+        "credits": { "type": "number", "description": "Current credits balance" },
+        "membershipTier": { "type": "string", "enum": ["free", "lite", "premium", "pro"], "description": "VIP membership plan" },
+        "dailyStreak": { "type": "number", "description": "Consecutive days login streak" },
+        "lastDailyClaim": { "type": "string", "description": "ISO timestamp of last daily bonus claim" },
+        "totalEarned": { "type": "number", "description": "Lifetime credits earned" },
+        "totalSpent": { "type": "number", "description": "Lifetime credits spent on campaigns" },
+        "viewsGiven": { "type": "number", "description": "Number of videos watched" },
+        "likesGiven": { "type": "number", "description": "Number of videos liked" },
+        "subsGiven": { "type": "number", "description": "Number of channels subscribed" },
+        "referralCode": { "type": "string", "maxLength": 30, "description": "Affiliate referral code" },
+        "referralsCount": { "type": "number", "description": "Total referred users" },
+        "referralEarnings": { "type": "number", "description": "Credits earned from affiliate referrals" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last update" }
+      },
+      "required": ["id", "username", "credits", "membershipTier"]
+    },
+    "campaign": {
+      "title": "Campaign",
+      "description": "YouTube growth campaign for views, likes, subscribers, or watch hours",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Campaign document ID" },
+        "userId": { "type": "string", "description": "Creator user UID" },
+        "videoUrl": { "type": "string", "maxLength": 500, "description": "YouTube video link" },
+        "videoTitle": { "type": "string", "maxLength": 200, "description": "YouTube video title" },
+        "channelName": { "type": "string", "maxLength": 100, "description": "YouTube channel name" },
+        "thumbnailUrl": { "type": "string", "maxLength": 500, "description": "Video thumbnail image URL" },
+        "serviceType": { "type": "string", "enum": ["views", "likes", "subscribers", "comments", "watch_hours"], "description": "Campaign target action" },
+        "targetAmount": { "type": "number", "description": "Target quantity requested" },
+        "deliveredAmount": { "type": "number", "description": "Quantity currently delivered" },
+        "durationSec": { "type": "number", "description": "Required watch duration in seconds" },
+        "speedPerHour": { "type": "number", "description": "Delivery speed rate limit per hour" },
+        "countryTarget": { "type": "string", "maxLength": 100, "description": "Geographic audience targeting" },
+        "costCredits": { "type": "number", "description": "Credits deducted for this campaign" },
+        "status": { "type": "string", "enum": ["active", "paused", "completed"], "description": "Campaign lifecycle status" },
+        "createdAt": { "type": "string", "description": "Creation ISO date" },
+        "updatedAt": { "type": "string", "description": "Last updated ISO date" }
+      },
+      "required": ["userId", "videoUrl", "videoTitle", "serviceType", "targetAmount", "costCredits", "status"]
+    },
+    "order": {
+      "title": "Order",
+      "description": "Digital payment order record via PayPal or Bitcoin",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Order reference code" },
+        "userId": { "type": "string", "description": "Buyer user UID" },
+        "itemId": { "type": "string", "maxLength": 100, "description": "Purchased item ID" },
+        "itemType": { "type": "string", "enum": ["credits", "membership", "express"], "description": "Item category" },
+        "itemName": { "type": "string", "maxLength": 200, "description": "Product display name" },
+        "itemDetails": { "type": "string", "maxLength": 300, "description": "Product details" },
+        "amountUsd": { "type": "number", "description": "USD price" },
+        "amountBtc": { "type": "number", "description": "BTC equivalent amount" },
+        "paymentMethod": { "type": "string", "enum": ["paypal", "bitcoin"], "description": "Chosen payment gateway" },
+        "status": { "type": "string", "enum": ["pending", "completed", "failed"], "description": "Order status" },
+        "timestamp": { "type": "string", "description": "Transaction ISO timestamp" },
+        "recipientPayPal": { "type": "string", "maxLength": 120, "description": "Receiver PayPal address" },
+        "recipientBtc": { "type": "string", "maxLength": 120, "description": "Receiver Bitcoin address" }
+      },
+      "required": ["userId", "itemId", "itemType", "itemName", "amountUsd", "paymentMethod", "status", "timestamp"]
+    },
+    "presence": {
+      "title": "Presence",
+      "description": "Real-time user heartbeat indicator for online community counts",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Online user UID" },
+        "username": { "type": "string", "maxLength": 50, "description": "User display name" },
+        "lastSeen": { "type": "number", "description": "Epoch timestamp in milliseconds of heartbeat" },
+        "isExchanging": { "type": "boolean", "description": "Whether currently watching videos in exchange client" }
+      },
+      "required": ["userId", "username", "lastSeen"]
+    },
+    "globalStats": {
+      "title": "GlobalStats",
+      "description": "Live aggregate network statistics",
+      "type": "object",
+      "properties": {
+        "totalViewsExchanged": { "type": "number", "description": "Total views served across all members" },
+        "totalCreditsEarned": { "type": "number", "description": "Total credits earned across network" },
+        "totalActiveCampaigns": { "type": "number", "description": "Total live campaigns running" },
+        "lastUpdated": { "type": "string", "description": "ISO timestamp" }
+      },
+      "required": ["totalViewsExchanged"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "user",
+      "description": "Individual creator profile with persistent credits and settings"
+    },
+    "/campaigns/{campaignId}": {
+      "schema": "campaign",
+      "description": "Shared community YouTube campaign pool for audience exchange"
+    },
+    "/orders/{orderId}": {
+      "schema": "order",
+      "description": "Digital purchase invoice history for PayPal and BTC transactions"
+    },
+    "/presence/{presenceId}": {
+      "schema": "presence",
+      "description": "Live active heartbeat presence records across all connected visitors"
+    },
+    "/global_stats/{statId}": {
+      "schema": "globalStats",
+      "description": "Network-wide aggregate counters and exchange totals"
+    }
+  }
+}
